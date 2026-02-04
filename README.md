@@ -72,3 +72,7 @@ If a referenced flow is missing from the imported files, it is rendered as an ex
 ## Notes
 
 All parsing and visualization happens in the browser. Your JSON files are not uploaded anywhere.
+
+## License
+
+MIT License - see [LICENSE](LICENSE) for details.
