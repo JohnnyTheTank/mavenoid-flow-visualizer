@@ -16,18 +16,18 @@ Visualize relationships between Mavenoid flows and drill into operation graphs. 
 ### Requirements
 
 - Node.js 18+ (recommended)
-- A package manager (`npm` or `yarn`)
+- Yarn
 
 ### Install
 
 ```bash
-npm install
+yarn install
 ```
 
 ### Run (dev)
 
 ```bash
-npm run dev
+yarn dev
 ```
 
 Open the local URL shown in the terminal.
@@ -35,13 +35,13 @@ Open the local URL shown in the terminal.
 ### Build
 
 ```bash
-npm run build
+yarn build
 ```
 
 ### Preview the production build
 
 ```bash
-npm run preview
+yarn preview
 ```
 
 ## Usage
