@@ -2,6 +2,8 @@
 
 Visualize relationships between Mavenoid flows and drill into operation graphs. Drop a folder of Mavenoid export JSON files and explore how flows link and resolve to one another.
 
+Try it in the browser: [Mavenoid Flow Visualizer](https://johnnythetank.github.io/mavenoid-flow-visualizer/)
+
 ## Features
 
 - Flow dependency graph with root/component/external nodes
