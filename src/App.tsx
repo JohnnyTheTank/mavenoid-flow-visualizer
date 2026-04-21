@@ -1,4 +1,16 @@
 import { useState, useCallback, useMemo } from "react";
+import { 
+  AppShell, 
+  Title, 
+  TextInput, 
+  Group, 
+  Stack, 
+  Container,
+  Paper,
+  Text,
+  Grid,
+  Box
+} from '@mantine/core';
 import { FileUploader } from "./components/FileUploader";
 import { GraphView } from "./components/GraphView";
 import { GraphControls } from "./components/GraphControls";
@@ -241,175 +253,130 @@ function App() {
   }, [graphData]);
 
   return (
-    <div className="min-h-screen bg-gray-100 flex flex-col">
+    <AppShell
+      header={{ height: 60 }}
+      navbar={
+        data && selectedNodeId
+          ? { width: 320, breakpoint: 'md' }
+          : undefined
+      }
+      padding={0}
+    >
       {/* Header */}
-      <header className="bg-white border-b border-gray-200 px-4 py-3">
-        <div className="flex items-center justify-between">
-          <h1 className="text-xl font-semibold text-gray-900">
-            Mavenoid Flow Visualizer
-          </h1>
-          {data && (
-            <div className="flex items-center gap-4">
-              {viewMode === "flows" && (
-                <input
-                  type="text"
-                  placeholder="Search flows..."
-                  value={searchTerm}
-                  onChange={(e) => setSearchTerm(e.target.value)}
-                  className="px-3 py-1.5 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
-                />
-              )}
-              <ViewToggle
-                viewMode={viewMode}
-                onViewChange={handleViewChange}
-                selectedFlowName={selectedFlow?.name}
-                onBackToFlows={viewMode === "operations" ? handleBackToFlows : undefined}
-              />
-            </div>
+      <AppShell.Header>
+        <Group h="100%" px="md" justify="space-between">
+          <Title order={2}>Mavenoid Flow Visualizer</Title>
+          {data && viewMode === "flows" && (
+            <TextInput
+              placeholder="Search flows..."
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.currentTarget.value)}
+              style={{ width: 300 }}
+            />
           )}
-        </div>
-      </header>
+        </Group>
+      </AppShell.Header>
 
-      {/* Main content */}
-      <main className="flex-1 flex overflow-hidden">
+      {/* Sidebar */}
+      {data && selectedNodeId && (
+        <AppShell.Navbar>
+          <Sidebar
+            selectedNodeId={selectedNodeId}
+            data={data}
+            viewMode={viewMode}
+            selectedFlow={selectedFlow}
+            onDrillDown={handleDrillDown}
+          />
+        </AppShell.Navbar>
+      )}
+
+      {/* Main Content */}
+      <AppShell.Main style={{ display: 'flex', flexDirection: 'column', height: '100vh' }}>
         {!data ? (
-          <div className="flex-1 flex items-center justify-center p-8">
-            <div className="max-w-md w-full">
-              <FileUploader
-                onFilesSelected={handleFilesSelected}
-                isLoading={isLoading}
-              />
-              <p className="text-center text-sm text-gray-500 mt-4">
-                Drop a folder of Mavenoid flow export JSON files to visualize
-                their relationships
-              </p>
-            </div>
-          </div>
+          <Container size="sm" py="xl">
+            <FileUploader
+              onFilesSelected={handleFilesSelected}
+              isLoading={isLoading}
+            />
+          </Container>
         ) : (
           <>
-            {/* Graph area */}
-            <div className="flex-1 flex flex-col">
-              {/* Graph Controls */}
+            {/* Stats Bar */}
+            {stats && (
+              <Paper p="md" radius={0} withBorder>
+                <Grid>
+                  <Grid.Col span="auto">
+                    <Group gap="xl">
+                      <StatItem label="Total Flows" value={stats.total} />
+                      <StatItem label="Root Flows" value={stats.roots} color="green" />
+                      <StatItem label="Components" value={stats.components} color="indigo" />
+                      <StatItem label="References" value={stats.references} />
+                      {visibleStats && (
+                        <>
+                          <Box style={{ width: 1, height: 32, backgroundColor: 'var(--mantine-color-gray-3)' }} />
+                          <StatItem label="Visible Nodes" value={visibleStats.nodes} />
+                          <StatItem label="Visible Edges" value={visibleStats.edges} />
+                        </>
+                      )}
+                    </Group>
+                  </Grid.Col>
+                  <Grid.Col span="content">
+                    <ViewToggle
+                      viewMode={viewMode}
+                      onViewChange={handleViewChange}
+                      selectedFlowName={selectedFlow?.name}
+                      onBackToFlows={handleBackToFlows}
+                    />
+                  </Grid.Col>
+                </Grid>
+              </Paper>
+            )}
+
+            {/* Graph Controls */}
+            {viewMode === "flows" && (
               <GraphControls
                 settings={graphSettings}
                 onSettingsChange={setGraphSettings}
-                hasSelectedNode={!!selectedNodeId}
+                hasSelectedNode={selectedNodeId !== null}
               />
+            )}
 
-              {/* Stats bar */}
-              {stats && viewMode === "flows" && (
-                <div className="bg-white border-b border-gray-200 px-4 py-2 flex items-center gap-6 text-sm">
-                  <span className="text-gray-500">
-                    Showing:{" "}
-                    <span className="font-medium text-gray-900">
-                      {visibleStats?.nodes || 0}
-                    </span>{" "}
-                    of {stats.total} flows
-                  </span>
-                  <span className="text-gray-500">
-                    Root:{" "}
-                    <span className="font-medium text-green-600">
-                      {stats.roots}
-                    </span>
-                  </span>
-                  <span className="text-gray-500">
-                    Components:{" "}
-                    <span className="font-medium text-indigo-600">
-                      {stats.components}
-                    </span>
-                  </span>
-                  <span className="text-gray-500">
-                    Edges:{" "}
-                    <span className="font-medium text-gray-900">
-                      {visibleStats?.edges || 0}
-                    </span>
-                  </span>
-                  <button
-                    onClick={() => {
-                      setData(null);
-                      setSelectedFlow(null);
-                      setSelectedNodeId(null);
-                      setSearchTerm("");
-                      setGraphSettings(DEFAULT_GRAPH_SETTINGS);
-                    }}
-                    className="ml-auto text-gray-500 hover:text-gray-700"
-                  >
-                    Load different files
-                  </button>
-                </div>
+            {/* Graph View */}
+            <Box style={{ flex: 1, minHeight: 0, position: 'relative' }}>
+              {graphData && (
+                <GraphView
+                  data={graphData}
+                  settings={graphSettings}
+                  onNodeClick={handleNodeClick}
+                  viewMode={viewMode}
+                />
               )}
-
-              {viewMode === "operations" && selectedFlow && (
-                <div className="bg-white border-b border-gray-200 px-4 py-2 flex items-center gap-6 text-sm">
-                  <span className="text-gray-500">
-                    Operations:{" "}
-                    <span className="font-medium text-gray-900">
-                      {selectedFlow.operations.length}
-                    </span>
-                  </span>
-                  <span className="text-gray-500">
-                    Connections:{" "}
-                    <span className="font-medium text-gray-900">
-                      {selectedFlow.connections.length}
-                    </span>
-                  </span>
-                </div>
-              )}
-
-              {/* Graph */}
-              <div className="flex-1 p-4">
-                {graphData && (
-                  <GraphView
-                    data={graphData}
-                    onNodeClick={handleNodeClick}
-                    viewMode={viewMode}
-                    settings={graphSettings}
-                  />
-                )}
-              </div>
-            </div>
-
-            {/* Sidebar */}
-            <Sidebar
-              selectedNodeId={selectedNodeId}
-              data={data}
-              viewMode={viewMode}
-              selectedFlow={selectedFlow}
-              onDrillDown={handleDrillDown}
-            />
+            </Box>
           </>
         )}
-      </main>
+      </AppShell.Main>
+    </AppShell>
+  );
+}
 
-      {/* Legend */}
-      {data && viewMode === "flows" && (
-        <footer className="bg-white border-t border-gray-200 px-4 py-2">
-          <div className="flex items-center gap-6 text-xs">
-            <span className="text-gray-500">Legend:</span>
-            <div className="flex items-center gap-2">
-              <span className="w-3 h-3 rounded" style={{ backgroundColor: "#3b82f6" }}></span>
-              <span className="text-gray-600">Flow (Root)</span>
-            </div>
-            <div className="flex items-center gap-2">
-              <span className="w-3 h-3 rounded" style={{ backgroundColor: "#d4d5db" }}></span>
-              <span className="text-gray-600">Component</span>
-            </div>
-            <div className="flex items-center gap-2">
-              <span className="w-3 h-3 rounded bg-gray-400"></span>
-              <span className="text-gray-600">External Reference</span>
-            </div>
-            <div className="flex items-center gap-2">
-              <span className="w-6 h-0.5 bg-gray-400"></span>
-              <span className="text-gray-600">Resolve</span>
-            </div>
-            <div className="flex items-center gap-2">
-              <span className="w-6 h-0.5 bg-pink-400 border-dashed border-t-2 border-pink-400"></span>
-              <span className="text-gray-600">Link</span>
-            </div>
-          </div>
-        </footer>
-      )}
-    </div>
+function StatItem({ 
+  label, 
+  value, 
+  color 
+}: { 
+  label: string; 
+  value: number; 
+  color?: string;
+}) {
+  return (
+    <Stack gap={2}>
+      <Text size="xs" c="dimmed" tt="uppercase" fw={600}>
+        {label}
+      </Text>
+      <Text size="xl" fw={700} c={color}>
+        {value}
+      </Text>
+    </Stack>
   );
 }
 

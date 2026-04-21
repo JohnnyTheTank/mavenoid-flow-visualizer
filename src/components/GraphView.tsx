@@ -365,6 +365,6 @@ export function GraphView({ data, onNodeClick, viewMode, settings }: GraphViewPr
   }, [enrichedData, handleNodeClick, styles, layoutConfig]);
 
   return (
-    <div ref={containerRef} className="w-full h-full bg-slate-50 rounded-lg" />
+    <div ref={containerRef} style={{ width: "100%", height: "100%", backgroundColor: "#f8fafc", borderRadius: "8px" }} />
   );
 }

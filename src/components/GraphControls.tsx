@@ -1,4 +1,15 @@
 import { useState } from "react";
+import { 
+  Select, 
+  Switch, 
+  NumberInput, 
+  Accordion, 
+  Stack, 
+  Text, 
+  Grid,
+  Paper
+} from '@mantine/core';
+import { IconChevronDown } from '@tabler/icons-react';
 import type { GraphSettings, LayoutType } from "../types/flow";
 
 interface GraphControlsProps {
@@ -34,170 +45,140 @@ export function GraphControls({
   };
 
   return (
-    <div className="bg-white border-b border-gray-200">
-      {/* Toggle button */}
-      <button
-        onClick={() => setIsExpanded(!isExpanded)}
-        className="w-full px-4 py-2 flex items-center justify-between text-sm text-gray-600 hover:bg-gray-50"
+    <Paper withBorder>
+      <Accordion 
+        value={isExpanded ? 'display-options' : null}
+        onChange={(value) => setIsExpanded(value === 'display-options')}
+        chevron={<IconChevronDown size={16} />}
       >
-        <span className="font-medium">Display Options</span>
-        <svg
-          className={`w-4 h-4 transition-transform ${isExpanded ? "rotate-180" : ""}`}
-          fill="none"
-          stroke="currentColor"
-          viewBox="0 0 24 24"
-        >
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-        </svg>
-      </button>
+        <Accordion.Item value="display-options">
+          <Accordion.Control>
+            <Text size="sm" fw={500}>Display Options</Text>
+          </Accordion.Control>
+          <Accordion.Panel>
+            <Grid>
+              {/* Layout Section */}
+              <Grid.Col span={3}>
+                <Stack gap="xs">
+                  <Text size="xs" fw={600} tt="uppercase" c="dimmed">
+                    Layout
+                  </Text>
+                  <Select
+                    data={LAYOUT_OPTIONS.map(opt => ({ 
+                      value: opt.value, 
+                      label: opt.label 
+                    }))}
+                    value={settings.layout}
+                    onChange={(value) => updateSetting('layout', value as LayoutType)}
+                    size="sm"
+                  />
+                </Stack>
+              </Grid.Col>
 
-      {/* Expanded controls */}
-      {isExpanded && (
-        <div className="px-4 py-3 border-t border-gray-100 grid grid-cols-4 gap-6">
-          {/* Layout Section */}
-          <div>
-            <h3 className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2">
-              Layout
-            </h3>
-            <select
-              value={settings.layout}
-              onChange={(e) => updateSetting("layout", e.target.value as LayoutType)}
-              className="w-full px-2 py-1.5 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500"
-            >
-              {LAYOUT_OPTIONS.map((opt) => (
-                <option key={opt.value} value={opt.value}>
-                  {opt.label}
-                </option>
-              ))}
-            </select>
-          </div>
+              {/* Node Options */}
+              <Grid.Col span={3}>
+                <Stack gap="xs">
+                  <Text size="xs" fw={600} tt="uppercase" c="dimmed">
+                    Nodes
+                  </Text>
+                  <Switch
+                    label="Show labels"
+                    checked={settings.showLabels}
+                    onChange={(e) => updateSetting('showLabels', e.currentTarget.checked)}
+                    size="sm"
+                  />
+                  <Switch
+                    label="Size by connections"
+                    checked={settings.sizeByConnections}
+                    onChange={(e) => updateSetting('sizeByConnections', e.currentTarget.checked)}
+                    size="sm"
+                  />
+                  <Switch
+                    label="Compact mode"
+                    checked={settings.compactMode}
+                    onChange={(e) => updateSetting('compactMode', e.currentTarget.checked)}
+                    size="sm"
+                  />
+                </Stack>
+              </Grid.Col>
 
-          {/* Node Options */}
-          <div>
-            <h3 className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2">
-              Nodes
-            </h3>
-            <div className="space-y-2">
-              <Toggle
-                label="Show labels"
-                checked={settings.showLabels}
-                onChange={(v) => updateSetting("showLabels", v)}
-              />
-              <Toggle
-                label="Size by connections"
-                checked={settings.sizeByConnections}
-                onChange={(v) => updateSetting("sizeByConnections", v)}
-              />
-              <Toggle
-                label="Compact mode"
-                checked={settings.compactMode}
-                onChange={(v) => updateSetting("compactMode", v)}
-              />
-            </div>
-          </div>
+              {/* Edge Options */}
+              <Grid.Col span={3}>
+                <Stack gap="xs">
+                  <Text size="xs" fw={600} tt="uppercase" c="dimmed">
+                    Edges
+                  </Text>
+                  <Switch
+                    label="Curved edges"
+                    checked={settings.curvedEdges}
+                    onChange={(e) => updateSetting('curvedEdges', e.currentTarget.checked)}
+                    size="sm"
+                  />
+                  <Switch
+                    label="Show arrows"
+                    checked={settings.showArrows}
+                    onChange={(e) => updateSetting('showArrows', e.currentTarget.checked)}
+                    size="sm"
+                  />
+                  <Select
+                    label="Thickness"
+                    data={[
+                      { value: 'thin', label: 'Thin' },
+                      { value: 'normal', label: 'Normal' },
+                      { value: 'thick', label: 'Thick' },
+                    ]}
+                    value={settings.edgeThickness}
+                    onChange={(value) => updateSetting('edgeThickness', value as 'thin' | 'normal' | 'thick')}
+                    size="xs"
+                  />
+                </Stack>
+              </Grid.Col>
 
-          {/* Edge Options */}
-          <div>
-            <h3 className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2">
-              Edges
-            </h3>
-            <div className="space-y-2">
-              <Toggle
-                label="Curved edges"
-                checked={settings.curvedEdges}
-                onChange={(v) => updateSetting("curvedEdges", v)}
-              />
-              <Toggle
-                label="Show arrows"
-                checked={settings.showArrows}
-                onChange={(v) => updateSetting("showArrows", v)}
-              />
-              <div className="flex items-center gap-2">
-                <span className="text-xs text-gray-600">Thickness:</span>
-                <select
-                  value={settings.edgeThickness}
-                  onChange={(e) =>
-                    updateSetting("edgeThickness", e.target.value as "thin" | "normal" | "thick")
-                  }
-                  className="flex-1 px-2 py-1 text-xs border border-gray-300 rounded focus:outline-none focus:ring-1 focus:ring-indigo-500"
-                >
-                  <option value="thin">Thin</option>
-                  <option value="normal">Normal</option>
-                  <option value="thick">Thick</option>
-                </select>
-              </div>
-            </div>
-          </div>
-
-          {/* Filters */}
-          <div>
-            <h3 className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2">
-              Filters
-            </h3>
-            <div className="space-y-2">
-              <Toggle
-                label="Show root flows"
-                checked={settings.showRoots}
-                onChange={(v) => updateSetting("showRoots", v)}
-              />
-              <Toggle
-                label="Show components"
-                checked={settings.showComponents}
-                onChange={(v) => updateSetting("showComponents", v)}
-              />
-              <Toggle
-                label="Show external refs"
-                checked={settings.showExternal}
-                onChange={(v) => updateSetting("showExternal", v)}
-              />
-              <div className="flex items-center gap-2">
-                <span className="text-xs text-gray-600">Min connections:</span>
-                <input
-                  type="number"
-                  min={0}
-                  max={50}
-                  value={settings.minConnections}
-                  onChange={(e) => updateSetting("minConnections", parseInt(e.target.value) || 0)}
-                  className="w-16 px-2 py-1 text-xs border border-gray-300 rounded focus:outline-none focus:ring-1 focus:ring-indigo-500"
-                />
-              </div>
-              <Toggle
-                label="Isolate selected"
-                checked={settings.isolateSelected}
-                onChange={(v) => updateSetting("isolateSelected", v)}
-                disabled={!hasSelectedNode}
-                title={hasSelectedNode ? undefined : "Select a node first"}
-              />
-            </div>
-          </div>
-        </div>
-      )}
-    </div>
-  );
-}
-
-interface ToggleProps {
-  label: string;
-  checked: boolean;
-  onChange: (checked: boolean) => void;
-  disabled?: boolean;
-  title?: string;
-}
-
-function Toggle({ label, checked, onChange, disabled, title }: ToggleProps) {
-  return (
-    <label
-      className={`flex items-center gap-2 cursor-pointer ${disabled ? "opacity-50 cursor-not-allowed" : ""}`}
-      title={title}
-    >
-      <input
-        type="checkbox"
-        checked={checked}
-        onChange={(e) => onChange(e.target.checked)}
-        disabled={disabled}
-        className="w-3.5 h-3.5 rounded border-gray-300 text-indigo-600 focus:ring-indigo-500"
-      />
-      <span className="text-xs text-gray-700">{label}</span>
-    </label>
+              {/* Filters */}
+              <Grid.Col span={3}>
+                <Stack gap="xs">
+                  <Text size="xs" fw={600} tt="uppercase" c="dimmed">
+                    Filters
+                  </Text>
+                  <Switch
+                    label="Show root flows"
+                    checked={settings.showRoots}
+                    onChange={(e) => updateSetting('showRoots', e.currentTarget.checked)}
+                    size="sm"
+                  />
+                  <Switch
+                    label="Show components"
+                    checked={settings.showComponents}
+                    onChange={(e) => updateSetting('showComponents', e.currentTarget.checked)}
+                    size="sm"
+                  />
+                  <Switch
+                    label="Show external refs"
+                    checked={settings.showExternal}
+                    onChange={(e) => updateSetting('showExternal', e.currentTarget.checked)}
+                    size="sm"
+                  />
+                  <NumberInput
+                    label="Min connections"
+                    min={0}
+                    max={50}
+                    value={settings.minConnections}
+                    onChange={(value) => updateSetting('minConnections', Number(value) || 0)}
+                    size="xs"
+                  />
+                  <Switch
+                    label="Isolate selected"
+                    checked={settings.isolateSelected}
+                    onChange={(e) => updateSetting('isolateSelected', e.currentTarget.checked)}
+                    disabled={!hasSelectedNode}
+                    size="sm"
+                  />
+                </Stack>
+              </Grid.Col>
+            </Grid>
+          </Accordion.Panel>
+        </Accordion.Item>
+      </Accordion>
+    </Paper>
   );
 }

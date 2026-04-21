@@ -1,4 +1,4 @@
-@import "tailwindcss";
+@import '@mantine/core/styles.css';
 
 body {
   margin: 0;
